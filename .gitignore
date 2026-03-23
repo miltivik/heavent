@@ -1,0 +1,100 @@
+# Godot 4+ specific
+.godot/
+.import/
+*.import
+*.tscn
+*.scn
+*.eso
+*.eso.import
+*.eso-*
+*.eso-*.import
+
+# Godot cache and temporary files
+cache/
+tmp/
+*.tmp
+*.temp
+
+# Exported builds
+build/
+exports/
+*.exe
+*.dmg
+*.pck
+*.zip
+*.app
+*.apk
+*.x86_64
+*.dll
+*.so
+*.dylib
+
+# Godot 4 specific
+*.uid
+*.tres
+*.res
+*.godot
+.project
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Environment files (secrets)
+.env
+.env.local
+.env.*.local
+
+# User-specific
+*.user
+*.user.*
+*.uid
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Crash reports
+crashes/
+*.dmp
+
+# Profiles
+profiles/
+*.profile
+
+# Godot Shader Cache
+shader_cache/
+shadercache/
+
+# Mono builds (if using C#)
+*.csproj
+*.sln
+*.userprefs
+*.pidb
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.VC.opendb
+
+# Import memory
+import_memory/
+
+# Translation files (if using editor)
+*.translation
+
+# Godot resource files that should be versioned separately
+# Keep: project.godot, scenes/, scripts/, assets/, audio/, docs/
+# Exclude: auto-generated resource files
