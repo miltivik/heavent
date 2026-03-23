@@ -1,0 +1,114 @@
+[gd_scene load_steps=4 format=3 uid="uid://test_level_01"]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
+
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(30, 1, 30)
+
+[sub_resource type="Environment" id="TestEnvironment"]
+background_mode = 2
+background_color = Color(0.15, 0.15, 0.2, 1.0)
+ambient_light_source = 1
+ambient_light_color = Color(0.7, 0.75, 0.85, 1.0)
+ambient_light_energy = 2.0
+
+[node name="TestLevel" type="Node3D"]
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("TestEnvironment")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.5, 0, -0.383022, 0.663414, 0.642788, 0.321394, -0.55667, 0.766044, 0, 0, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Floor" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = BoxMesh
+transform = Transform3D(30, 0, 0, 0, 1, 0, 0, 0, 30, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("FloorShape")
+
+[node name="Walls" type="Node3D" parent="."]
+
+[node name="WallNorth" type="StaticBody3D" parent="Walls"]
+collision_layer = 1
+
+[node name="WallNorthShape" type="CollisionShape3D" parent="Walls/WallNorth"]
+transform = Transform3D(30, 0, 0, 0, 5, 0, 0, 0, 1, 0, 2.5, -15)
+
+[node name="WallSouth" type="StaticBody3D" parent="Walls"]
+collision_layer = 1
+
+[node name="WallSouthShape" type="CollisionShape3D" parent="Walls/WallSouth"]
+transform = Transform3D(30, 0, 0, 0, 5, 0, 0, 0, 1, 0, 2.5, 15)
+
+[node name="WallEast" type="StaticBody3D" parent="Walls"]
+collision_layer = 1
+
+[node name="WallEastShape" type="CollisionShape3D" parent="Walls/WallEast"]
+transform = Transform3D(1, 0, 0, 0, 5, 0, 0, 0, 30, 15, 2.5, 0)
+
+[node name="WallWest" type="StaticBody3D" parent="Walls"]
+collision_layer = 1
+
+[node name="WallWestShape" type="CollisionShape3D" parent="Walls/WallWest"]
+transform = Transform3D(1, 0, 0, 0, 5, 0, 0, 0, 30, -15, 2.5, 0)
+
+[node name="Platforms" type="Node3D" parent="."]
+
+[node name="PlatformA" type="StaticBody3D" parent="Platforms"]
+collision_layer = 1
+
+[node name="PlatformACollision" type="CollisionShape3D" parent="Platforms/PlatformA"]
+transform = Transform3D(4, 0, 0, 0, 1, 0, 0, 0, 4, -5, 2, 5)
+
+[node name="PlatformB" type="StaticBody3D" parent="Platforms"]
+collision_layer = 1
+
+[node name="PlatformBCollision" type="CollisionShape3D" parent="Platforms/PlatformB"]
+transform = Transform3D(3, 0, 0, 0, 1, 0, 0, 0, 3, 7, 3, -4)
+
+[node name="PlatformC" type="StaticBody3D" parent="Platforms"]
+collision_layer = 1
+
+[node name="PlatformCCollision" type="CollisionShape3D" parent="Platforms/PlatformC"]
+transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, -8, 4.5, -6)
+
+[node name="Ramps" type="Node3D" parent="."]
+
+[node name="RampA" type="StaticBody3D" parent="Ramps"]
+collision_layer = 1
+
+[node name="RampACollision" type="CollisionShape3D" parent="Ramps/RampA"]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 8, 0.8, 8)
+
+[node name="Pillars" type="Node3D" parent="."]
+
+[node name="PillarA" type="StaticBody3D" parent="Pillars"]
+collision_layer = 1
+
+[node name="PillarACollision" type="CollisionShape3D" parent="Pillars/PillarA"]
+transform = Transform3D(1.2, 0, 0, 0, 3, 0, 0, 0, 1.2, 0, 1.5, 0)
+
+[node name="PillarB" type="StaticBody3D" parent="Pillars"]
+collision_layer = 1
+
+[node name="PillarBCollision" type="CollisionShape3D" parent="Pillars/PillarB"]
+transform = Transform3D(1.2, 0, 0, 0, 3, 0, 0, 0, 1.2, 5, 1.5, -3)
+
+[node name="PillarC" type="StaticBody3D" parent="Pillars"]
+collision_layer = 1
+
+[node name="PillarCCollision" type="CollisionShape3D" parent="Pillars/PillarC"]
+transform = Transform3D(1.2, 0, 0, 0, 3, 0, 0, 0, 1.2, -4, 1.5, 4)
+
+[node name="PlayerSpawn" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 8)
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 8)

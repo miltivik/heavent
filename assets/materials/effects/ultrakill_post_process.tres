@@ -1,0 +1,23 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+[ext_resource type="Shader" path="res://assets/materials/effects/ultrakill_post_process.gdshader" id="1_shader"]
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1_shader")
+shader_parameter/pixel_scale = 2.0
+shader_parameter/color_levels = 16.0
+shader_parameter/enable_dithering = true
+shader_parameter/dither_strength = 0.5
+shader_parameter/enable_scanlines = true
+shader_parameter/scanline_intensity = 0.08
+shader_parameter/scanline_count = 540.0
+shader_parameter/enable_vignette = true
+shader_parameter/vignette_intensity = 0.35
+shader_parameter/vignette_softness = 0.5
+shader_parameter/enable_chromatic = true
+shader_parameter/chromatic_amount = 1.2
+shader_parameter/contrast = 1.2
+shader_parameter/saturation = 1.3
+shader_parameter/brightness = 1.05
+shader_parameter/color_tint = Vector3(1.0, 0.98, 0.95)
