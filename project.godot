@@ -9,6 +9,10 @@ run/main_scene="res://scenes/levels/test_level.tscn"
 config/features=PackedStringArray("4.0", "Forward+")
 config/icon="res://icon.svg"
 
+[autoload]
+
+PSXAutoApply="*res://autoload/psx_auto_apply.gd"
+
 [display]
 
 window/size/viewport_width=1920
@@ -116,3 +120,5 @@ ui_cancel={
 
 renderer/rendering_method="forward_plus"
 environment/defaults/default_environment=""
+textures/canvas_textures/default_texture_filter=0
+textures/default_texture_filter="Nearest"

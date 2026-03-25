@@ -36,6 +36,17 @@ uniform float shake_speed : hint_range(1.0, 50.0) = 25.0;
 uniform float damage_flash_intensity : hint_range(0.0, 1.0) = 0.0;
 uniform vec3 damage_flash_color : source_color = vec3(0.8, 0.05, 0.05);
 
+// === DISTANCE FOG ===
+uniform bool enable_fog = false;
+uniform vec3 fog_color : source_color = vec3(0.05, 0.02, 0.1);
+uniform float fog_start : hint_range(0.0, 1.0) = 0.3;
+uniform float fog_end : hint_range(0.0, 1.0) = 0.85;
+
+// === FILM GRAIN ===
+uniform bool enable_grain = false;
+uniform float grain_intensity : hint_range(0.0, 0.3) = 0.08;
+uniform float grain_speed : hint_range(1.0, 100.0) = 30.0;
+
 // Bayer 4x4 ordered dithering matrix
 float bayer4x4(vec2 position) {
     int x = int(mod(position.x, 4.0));
@@ -140,6 +151,19 @@ void fragment() {
         edge_mask = pow(edge_mask, 1.5);
         float flash = damage_flash_intensity * mix(0.5, 1.0, edge_mask);
         color = mix(color, damage_flash_color, flash);
+    }
+
+    // === DISTANCE FOG (radial UV-based approximation) ===
+    if (enable_fog) {
+        float dist = length(uv - vec2(0.5));
+        float fog_factor = smoothstep(fog_start, fog_end, dist * 2.0);
+        color = mix(color, fog_color, fog_factor);
+    }
+
+    // === FILM GRAIN ===
+    if (enable_grain) {
+        float noise = hash(uv * screen_size + vec2(TIME * grain_speed, 0.0)) * 2.0 - 1.0;
+        color += vec3(noise * grain_intensity);
     }
 
     // Clamp final output

@@ -21,11 +21,18 @@ class_name PlayerCamera
 @export var bob_amplitude_max: float = 0.12
 @export var bob_smooth_speed: float = 12.0
 
+@export_group("Camera Tilt")
+@export var slide_tilt_angle: float = 4.0    # degrees of roll during slide
+@export var dash_tilt_angle: float = 2.5     # degrees of roll during dash
+@export var tilt_lerp_speed: float = 10.0    # how fast tilt transitions
+
 # State
 var _bob_phase: float = 0.0
 var _bob_current_amplitude: float = 0.0
 var _target_bob_offset: float = 0.0
 var _head_base_position: Vector3
+var _current_tilt: float = 0.0
+var _target_tilt: float = 0.0
 
 
 func _ready() -> void:
@@ -71,3 +78,15 @@ func _process(delta: float) -> void:
 		_bob_current_amplitude = lerpf(_bob_current_amplitude, 0.0, bob_smooth_speed * delta)
 
 	position = _head_base_position + Vector3(0.0, _target_bob_offset, 0.0)
+
+	# --- Camera Tilt ---
+	_target_tilt = 0.0
+	if player.has_method("is_sliding") and player.is_sliding():
+		var lateral := Input.get_axis("move_left", "move_right")
+		_target_tilt = -slide_tilt_angle if lateral == 0.0 else -slide_tilt_angle * signf(lateral)
+	elif player.has_method("is_dashing") and player.is_dashing():
+		var lateral := Input.get_axis("move_left", "move_right")
+		_target_tilt = -dash_tilt_angle * lateral
+
+	_current_tilt = lerpf(_current_tilt, _target_tilt, tilt_lerp_speed * delta)
+	rotation.z = deg_to_rad(_current_tilt)
