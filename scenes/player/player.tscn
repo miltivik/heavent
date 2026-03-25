@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/weapons/pistol.tscn" id="6_pistol"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/piercer.tscn" id="8_piercer"]
 [ext_resource type="PackedScene" path="res://scenes/ui/weapon_inventory_hud.tscn" id="9_weapon_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/crosshair.tscn" id="10_crosshair"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -75,4 +76,7 @@ layer = 129
 layout_mode = 3
 
 [node name="WeaponInventoryHUD" parent="HUDLayer" instance=ExtResource("9_weapon_hud")]
+layout_mode = 3
+
+[node name="Crosshair" parent="HUDLayer" instance=ExtResource("10_crosshair")]
 layout_mode = 3
