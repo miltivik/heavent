@@ -36,7 +36,7 @@ func _on_fire() -> void:
 		# Spawn impact effect
 		_spawn_impact(point, normal)
 
-		hit_landed.emit(hit)
+		emit_hit_landed(hit)
 	
 	# Screen shake feedback
 	_apply_screen_shake(fire_shake_intensity, fire_shake_duration)

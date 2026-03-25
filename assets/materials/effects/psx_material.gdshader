@@ -9,6 +9,7 @@ uniform float affine_intensity : hint_range(0.0, 1.0, 0.01) = 0.5;
 
 // Albedo texture (nearest-neighbor filtered)
 uniform sampler2D albedo_texture : source_color, filter_nearest;
+uniform bool use_albedo_texture = false;
 
 // Tint color
 uniform vec4 albedo_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
@@ -38,8 +39,10 @@ void vertex() {
 	// Set the snapped view-space position
 	VERTEX = view_pos.xyz;
 
-	// Transform normal manually (direction vector, w=0)
-	NORMAL = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	// Use inverse-transpose for normals so non-uniformly scaled meshes
+	// (like stretched walls) keep correct lighting.
+	mat3 normal_matrix = transpose(inverse(mat3(MODELVIEW_MATRIX)));
+	NORMAL = normalize(normal_matrix * NORMAL);
 
 	// Pass affine UV data to fragment shader
 	// Multiply UV by depth for affine mapping (negate z since view space z is negative)
@@ -60,9 +63,11 @@ void fragment() {
 	// When affine_intensity = 1: fully affine (PS1-style warping)
 	vec2 final_uv = mix(perspective_uv, corrected_uv, affine_intensity);
 
-	// Sample texture and apply tint
-	vec4 tex_color = texture(albedo_texture, final_uv);
-	vec4 final_color = tex_color * albedo_color;
+	// Use flat color by default. Test geometry in the level has no textures.
+	vec4 final_color = albedo_color;
+	if (use_albedo_texture) {
+		final_color *= texture(albedo_texture, final_uv);
+	}
 
 	ALBEDO = final_color.rgb;
 

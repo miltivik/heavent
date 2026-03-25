@@ -16,16 +16,18 @@ signal landed()
 
 # --- Movement ---
 @export_group("Movement")
-@export var move_speed: float = 450.0
-@export var max_speed: float = 900.0
-@export var ground_accel: float = 40.0
-@export var ground_decel: float = 15.0
+@export var move_speed: float = 9.0
+@export var max_speed: float = 16.0
+@export var ground_accel: float = 55.0
+@export var ground_decel: float = 60.0
+@export var ground_turn_accel: float = 85.0
+@export var ground_lateral_friction: float = 90.0
 
 # --- Air Control ---
 @export_group("Air Control")
-@export var air_accel: float = 12.0
-@export var air_decel: float = 1.5
-@export var air_friction_with_input: float = 0.98
+@export var air_accel: float = 18.0
+@export var air_decel: float = 4.0
+@export var air_friction_with_input: float = 0.992
 
 # --- Jump ---
 @export_group("Jump")
@@ -41,18 +43,20 @@ signal landed()
 
 # --- Dash ---
 @export_group("Dash")
-@export var dash_speed: float = 800.0
+@export var dash_speed: float = 24.0
 @export var dash_duration: float = 0.15
 @export var dash_stamina_cost: float = 1.0
 @export var dash_iframes: float = 0.2
 
 # --- Slide ---
 @export_group("Slide")
-@export var slide_speed: float = 550.0
+@export var slide_speed: float = 14.0
 @export var slide_friction: float = 0.98
-@export var slide_min_speed: float = 100.0
-@export var slide_jump_boost: float = 1.3
+@export var slide_min_speed: float = 6.5
+@export var slide_jump_boost: float = 1.15
 @export var slide_collider_height: float = 0.8
+@export var low_profile_speed_multiplier: float = 0.8
+@export var slide_buffer_time: float = 0.18
 
 # --- Slam ---
 @export_group("Slam")
@@ -71,7 +75,7 @@ signal landed()
 # --- Dash Jump ---
 @export_group("Dash Jump")
 @export var dash_jump_stamina_cost: float = 2.0
-@export var dash_jump_horizontal_boost: float = 1.5
+@export var dash_jump_horizontal_boost: float = 1.2
 @export var dash_jump_vertical_multiplier: float = 0.7
 
 # =============================================================================
@@ -93,7 +97,10 @@ var _is_invincible: bool = false
 
 # Slide
 var _is_sliding: bool = false
+var _is_low_profile: bool = false
 var _original_collider_height: float = 1.6
+var _slide_buffer_timer: float = 0.0
+var _slide_hold_armed: bool = false
 
 # Slam
 var _is_slamming: bool = false
@@ -124,17 +131,24 @@ func _ready() -> void:
 	if capsule:
 		_original_collider_height = capsule.height
 
+	for ray in [_wall_ray_left, _wall_ray_right, _wall_ray_front, _wall_ray_back]:
+		if ray:
+			ray.enabled = true
+
 
 func _physics_process(delta: float) -> void:
+	_update_slide_request(delta)
 	_handle_dash(delta)
 	_apply_gravity(delta)
 	_handle_slam()
 	_handle_slide(delta)
+	_update_low_profile_state()
 	_handle_wall_logic(delta)
 	_apply_movement(delta)
 	_handle_jump_logic()
 	_update_floor_state()
 	move_and_slide()
+	_enforce_horizontal_speed_cap()
 	_post_move_checks()
 
 
@@ -252,22 +266,15 @@ func _handle_slide(_delta: float) -> void:
 			_exit_slide()
 		return
 
-	# Start slide: must be on floor, pressing slide, and have speed
-	if Input.is_action_just_pressed("move_slide") and is_on_floor():
-		var h_speed := get_horizontal_speed()
-		if h_speed > slide_min_speed:
-			_enter_slide()
+	_try_start_slide()
 
 
 func _enter_slide() -> void:
 	_is_sliding = true
+	_is_low_profile = true
+	_consume_slide_request()
 
-	# Shrink collider
-	var capsule := _collision_shape.shape as CapsuleShape3D
-	if capsule:
-		capsule.height = slide_collider_height
-	# Move collider down to keep feet on ground
-	_collision_shape.position.y = slide_collider_height / 2.0
+	_set_collider_height(slide_collider_height)
 
 	# Set velocity in current movement direction at max of current speed or slide_speed
 	var h_speed := get_horizontal_speed()
@@ -285,15 +292,108 @@ func _enter_slide() -> void:
 
 func _exit_slide() -> void:
 	_is_sliding = false
-
-	# Restore collider
-	var capsule := _collision_shape.shape as CapsuleShape3D
-	if capsule:
-		capsule.height = _original_collider_height
-	_collision_shape.position.y = _original_collider_height / 2.0
-
 	# Resume stamina regen
 	_stamina.resume_regen()
+	_try_restore_standing_collider()
+
+
+func _update_slide_request(delta: float) -> void:
+	if Input.is_action_just_pressed("move_slide"):
+		_slide_buffer_timer = slide_buffer_time
+		if not is_on_floor():
+			_slide_hold_armed = true
+
+	if _slide_buffer_timer > 0.0:
+		_slide_buffer_timer = maxf(_slide_buffer_timer - delta, 0.0)
+
+	if not Input.is_action_pressed("move_slide"):
+		_slide_hold_armed = false
+	elif not is_on_floor():
+		_slide_hold_armed = true
+
+
+func _try_start_slide() -> bool:
+	if not _can_start_slide():
+		return false
+
+	if not _has_pending_slide_request():
+		return false
+
+	_enter_slide()
+	return true
+
+
+func _has_pending_slide_request() -> bool:
+	return _slide_buffer_timer > 0.0 or _slide_hold_armed
+
+
+func _consume_slide_request() -> void:
+	_slide_buffer_timer = 0.0
+	_slide_hold_armed = false
+
+
+func _can_start_slide() -> bool:
+	if _is_dashing or _is_sliding or _is_slamming:
+		return false
+
+	if not is_on_floor():
+		return false
+
+	return get_horizontal_speed() > slide_min_speed
+
+
+func _update_low_profile_state() -> void:
+	if _is_sliding or not _is_low_profile:
+		return
+
+	if _can_restore_standing_collider():
+		_restore_standing_collider()
+
+
+func _set_collider_height(height: float) -> void:
+	var capsule := _collision_shape.shape as CapsuleShape3D
+	if not capsule:
+		return
+
+	capsule.height = height
+	_collision_shape.position.y = height / 2.0
+
+
+func _try_restore_standing_collider() -> bool:
+	if not _can_restore_standing_collider():
+		return false
+
+	_restore_standing_collider()
+	return true
+
+
+func _restore_standing_collider() -> void:
+	_set_collider_height(_original_collider_height)
+	_is_low_profile = false
+
+
+func _can_restore_standing_collider() -> bool:
+	var current_capsule := _collision_shape.shape as CapsuleShape3D
+	if not current_capsule:
+		return true
+
+	var standing_capsule := CapsuleShape3D.new()
+	standing_capsule.radius = current_capsule.radius
+	standing_capsule.height = _original_collider_height
+
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = standing_capsule
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	query.collision_mask = collision_mask
+	query.exclude = [get_rid()]
+
+	var standing_transform := global_transform
+	standing_transform.origin += global_transform.basis * Vector3(0.0, _original_collider_height / 2.0, 0.0)
+	query.transform = standing_transform
+
+	var space_state := get_world_3d().direct_space_state
+	return space_state.intersect_shape(query, 1).is_empty()
 
 
 # =============================================================================
@@ -365,7 +465,7 @@ func _execute_wall_jump() -> void:
 # MOVEMENT (WASD)
 # =============================================================================
 
-func _apply_movement(_delta: float) -> void:
+func _apply_movement(delta: float) -> void:
 	if _is_dashing or _is_sliding:
 		return
 
@@ -373,12 +473,29 @@ func _apply_movement(_delta: float) -> void:
 	var wish_dir := (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 
 	if is_on_floor():
+		var current_hvel := Vector2(velocity.x, velocity.z)
+		var target_move_speed := move_speed
+		if _is_low_profile:
+			target_move_speed *= low_profile_speed_multiplier
+
 		if wish_dir.length() > 0.01:
-			velocity.x = move_toward(velocity.x, wish_dir.x * move_speed, ground_accel)
-			velocity.z = move_toward(velocity.z, wish_dir.z * move_speed, ground_accel)
+			var target_hvel := Vector2(wish_dir.x, wish_dir.z) * target_move_speed
+			var turn_accel := ground_accel
+			if current_hvel.length() > 0.01 and current_hvel.normalized().dot(target_hvel.normalized()) < 0.95:
+				turn_accel = ground_turn_accel
+
+			current_hvel = current_hvel.move_toward(target_hvel, turn_accel * delta)
+
+			var target_dir := target_hvel.normalized()
+			var forward_component := target_dir * current_hvel.dot(target_dir)
+			var lateral_component := current_hvel - forward_component
+			lateral_component = lateral_component.move_toward(Vector2.ZERO, ground_lateral_friction * delta)
+			current_hvel = forward_component + lateral_component
 		else:
-			velocity.x = move_toward(velocity.x, 0.0, ground_decel)
-			velocity.z = move_toward(velocity.z, 0.0, ground_decel)
+			current_hvel = current_hvel.move_toward(Vector2.ZERO, ground_decel * delta)
+
+		velocity.x = current_hvel.x
+		velocity.z = current_hvel.y
 	else:
 		# Air control — ULTRAKILL style
 		if wish_dir.length() > 0.01:
@@ -390,20 +507,15 @@ func _apply_movement(_delta: float) -> void:
 			var current_hvel := Vector3(velocity.x, 0.0, velocity.z)
 			var projected := current_hvel.project(wish_dir)
 			var remaining := wish_dir * move_speed - projected
-			remaining = remaining.limit_length(air_accel)
+			remaining = remaining.limit_length(air_accel * delta)
 			velocity.x += remaining.x
 			velocity.z += remaining.z
 		else:
 			# Very low decel when no input — preserve momentum
-			velocity.x = move_toward(velocity.x, 0.0, air_decel)
-			velocity.z = move_toward(velocity.z, 0.0, air_decel)
+			velocity.x = move_toward(velocity.x, 0.0, air_decel * delta)
+			velocity.z = move_toward(velocity.z, 0.0, air_decel * delta)
 
-	# Clamp horizontal speed
-	var hvel := Vector2(velocity.x, velocity.z)
-	if hvel.length() > max_speed:
-		hvel = hvel.normalized() * max_speed
-		velocity.x = hvel.x
-		velocity.z = hvel.y
+	_enforce_horizontal_speed_cap()
 
 
 # =============================================================================
@@ -506,6 +618,10 @@ func _update_floor_state() -> void:
 
 func _post_move_checks() -> void:
 	if is_on_floor():
+		var just_landed := not _was_on_floor
+		if just_landed:
+			_try_start_slide()
+
 		_wall_jumps_remaining = max_wall_jumps
 		_is_wall_clinging = false
 		_wall_cling_timer = 0.0
@@ -513,10 +629,32 @@ func _post_move_checks() -> void:
 			_is_slamming = false
 			_just_slammed = true
 			slammed.emit()
-		if not _was_on_floor:
+		if just_landed:
 			landed.emit()
 	else:
 		_just_slammed = false
+
+
+func _enforce_horizontal_speed_cap() -> void:
+	if _is_dashing or _is_sliding:
+		return
+
+	var speed_limit := max_speed
+	if not is_on_floor():
+		speed_limit = maxf(speed_limit, dash_speed * dash_jump_horizontal_boost)
+		speed_limit = maxf(speed_limit, slide_speed * slide_jump_boost)
+
+	_clamp_horizontal_speed(speed_limit)
+
+
+func _clamp_horizontal_speed(speed_limit: float) -> void:
+	var hvel := Vector2(velocity.x, velocity.z)
+	if hvel.length() <= speed_limit:
+		return
+
+	hvel = hvel.normalized() * speed_limit
+	velocity.x = hvel.x
+	velocity.z = hvel.y
 
 
 # =============================================================================
@@ -541,6 +679,10 @@ func is_dashing() -> bool:
 
 func is_sliding() -> bool:
 	return _is_sliding
+
+
+func is_low_profile() -> bool:
+	return _is_low_profile
 
 
 func is_slamming() -> bool:

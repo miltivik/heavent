@@ -1,69 +1,78 @@
-[gd_scene load_steps=8 format=3 uid="uid://player_main"]
+[gd_scene format=3 uid="uid://ctmggrqohp4ci"]
 
-[ext_resource type="Script" path="res://scripts/player/player_controller.gd" id="1_player"]
-[ext_resource type="Script" path="res://scripts/player/player_camera.gd" id="2_camera"]
-[ext_resource type="Script" path="res://scripts/player/stamina_system.gd" id="3_stamina"]
+[ext_resource type="Script" uid="uid://ctfakuhm472gb" path="res://scripts/player/player_controller.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://w6r442ds6pdb" path="res://scripts/player/player_camera.gd" id="2_camera"]
+[ext_resource type="Script" uid="uid://cp88xq0mx6rdr" path="res://scripts/player/stamina_system.gd" id="3_stamina"]
 [ext_resource type="PackedScene" path="res://scenes/ui/stamina_hud.tscn" id="4_hud"]
-[ext_resource type="Script" path="res://scripts/weapons/weapon_manager.gd" id="5_weapon_mgr"]
+[ext_resource type="Script" uid="uid://bc4hdwyyfd3db" path="res://scripts/weapons/weapon_manager.gd" id="5_weapon_mgr"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/pistol.tscn" id="6_pistol"]
-[ext_resource type="PackedScene" path="res://scenes/weapons/impact_effect.tscn" id="7_impact"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/piercer.tscn" id="8_piercer"]
+[ext_resource type="PackedScene" path="res://scenes/ui/weapon_inventory_hud.tscn" id="9_weapon_hud"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
 height = 1.6
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody3D" unique_id=949452764]
 collision_layer = 2
-collision_mask = 1
 floor_max_angle = 1.0472
-floor_snap_length = 0.1
 script = ExtResource("1_player")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=656023584]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 shape = SubResource("CapsuleShape3D_1")
 
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=2066196943]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.65, 0)
 fov = 90.0
 script = ExtResource("2_camera")
 
-[node name="WeaponManager" type="Node3D" parent="Camera3D"]
+[node name="PlayerFillLight" type="OmniLight3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, -0.2)
+light_color = Color(1, 0.94, 0.86, 1)
+light_energy = 0.08
+light_cull_mask = 1
+omni_range = 3.0
+omni_attenuation = 1.2
+shadow_enabled = false
+
+[node name="WeaponManager" type="Node3D" parent="Camera3D" unique_id=1439291245]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.25, -0.5)
 script = ExtResource("5_weapon_mgr")
+slot_1_weapon_id = "marksman"
+slot_1_scene = ExtResource("6_pistol")
+slot_1_unlocked_by_default = true
+slot_2_weapon_id = "piercer"
+slot_2_scene = ExtResource("8_piercer")
+slot_3_weapon_id = ""
 
-[node name="Pistol" parent="Camera3D/WeaponManager" instance=ExtResource("6_pistol")]
-impact_effect_scene = ExtResource("7_impact")
-
-[node name="FloorChecker" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0, 0)
+[node name="FloorChecker" type="RayCast3D" parent="." unique_id=114321704]
 target_position = Vector3(0, -0.1, 0)
-collision_mask = 1
 
-[node name="StaminaSystem" type="Node" parent="."]
+[node name="StaminaSystem" type="Node" parent="." unique_id=800988897]
 script = ExtResource("3_stamina")
 
-[node name="WallRayLeft" type="RayCast3D" parent="."]
+[node name="WallRayLeft" type="RayCast3D" parent="." unique_id=146644427]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 target_position = Vector3(-0.6, 0, 0)
-collision_mask = 1
 
-[node name="WallRayRight" type="RayCast3D" parent="."]
+[node name="WallRayRight" type="RayCast3D" parent="." unique_id=730143018]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 target_position = Vector3(0.6, 0, 0)
-collision_mask = 1
 
-[node name="WallRayFront" type="RayCast3D" parent="."]
+[node name="WallRayFront" type="RayCast3D" parent="." unique_id=1355020329]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 target_position = Vector3(0, 0, -0.6)
-collision_mask = 1
 
-[node name="WallRayBack" type="RayCast3D" parent="."]
+[node name="WallRayBack" type="RayCast3D" parent="." unique_id=112190088]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
 target_position = Vector3(0, 0, 0.6)
-collision_mask = 1
 
-[node name="HUDLayer" type="CanvasLayer" parent="."]
-layer = 1
+[node name="HUDLayer" type="CanvasLayer" parent="." unique_id=740278695]
+layer = 129
 
-[node name="StaminaHUD" parent="HUDLayer" instance=ExtResource("4_hud")]
+[node name="StaminaHUD" parent="HUDLayer" unique_id=853772716 instance=ExtResource("4_hud")]
+layout_mode = 3
+
+[node name="WeaponInventoryHUD" parent="HUDLayer" instance=ExtResource("9_weapon_hud")]
+layout_mode = 3

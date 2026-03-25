@@ -11,7 +11,6 @@ signal damage_received(amount: float, point: Vector3)
 @export var flash_duration: float = 0.1
 @export var flash_color: Color = Color(1.0, 1.0, 1.0, 1.0)
 
-var _original_color: Color = Color(0.8, 0.2, 0.2, 1.0)
 var _mesh_instance: MeshInstance3D = null
 var _total_damage: float = 0.0
 var _hit_count: int = 0

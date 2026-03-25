@@ -28,11 +28,22 @@ func _apply_preset() -> void:
 		return
 	var mat: ShaderMaterial = effect_rect.material
 	mat.set_shader_parameter("pixel_scale", pixel_scale)
+	mat.set_shader_parameter("contrast", 1.05)
+	mat.set_shader_parameter("brightness", 1.12)
+	mat.set_shader_parameter("black_level", 0.14)
+	mat.set_shader_parameter("shadow_lift", 0.22)
+	mat.set_shader_parameter("scanline_intensity", 0.04)
+	mat.set_shader_parameter("vignette_intensity", 0.18)
 
 func set_pixel_scale(value: float) -> void:
 	pixel_scale = value
 	if effect_rect and effect_rect.material:
 		effect_rect.material.set_shader_parameter("pixel_scale", value)
+
+func set_black_level(value: float) -> void:
+	## Ajusta el nivel de negro (0.0 = negro puro, 0.3 = negro muy suave)
+	if effect_rect and effect_rect.material:
+		effect_rect.material.set_shader_parameter("black_level", value)
 
 func toggle_effects() -> void:
 	enabled = !enabled

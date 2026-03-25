@@ -18,6 +18,9 @@ enum State { IDLE, FIRE, ALT_FIRE, COOLDOWN }
 
 # --- Base Stats ---
 @export_group("Weapon Stats")
+@export var weapon_id: String = ""
+@export var slot_index: int = 0
+@export var display_name: String = ""
 @export var weapon_name: String = "Weapon"
 @export var damage: float = 15.0
 @export var fire_rate: float = 0.15           # seconds between shots
@@ -42,6 +45,10 @@ var _camera: Camera3D = null
 
 
 func _ready() -> void:
+	if display_name.is_empty():
+		display_name = weapon_name
+	if weapon_id.is_empty():
+		weapon_id = display_name.to_snake_case()
 	set_process(false)
 	set_physics_process(false)
 
@@ -135,6 +142,10 @@ func get_aim_direction() -> Vector3:
 	return -global_basis.z
 
 
+func emit_hit_landed(hit_data: Dictionary) -> void:
+	hit_landed.emit(hit_data)
+
+
 # =============================================================================
 # INTERNAL
 # =============================================================================
@@ -154,3 +165,9 @@ func is_firing() -> bool:
 
 func is_cooling_down() -> bool:
 	return current_state == State.COOLDOWN
+
+
+func get_display_name() -> String:
+	if not display_name.is_empty():
+		return display_name
+	return weapon_name

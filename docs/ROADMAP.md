@@ -76,11 +76,10 @@ Este es el **scope más importante**. Si el movimiento no se siente bien, nada i
 - [ ] Efecto visual de disparo (muzzle flash, trazador)
 - [ ] Impacto en superficies (decals, partículas)
 - [ ] Impacto en enemigos (feedback de daño)
-- [ ] `coin.gd`: Moneda lanzable, flota brevemente, redirige disparos
 - [ ] Sistema de ammo (infinito para pistola, limitado para otras)
 - [ ] Feedback screen shake sutil al disparar
 
-**Entregable:** Pistola completamente funcional con coin toss. Se puede disparar, ver impactos y usar la moneda.
+**Entregable:** Pistola completamente funcional. Se puede disparar y ver impactos.
 
 ---
 
@@ -170,9 +169,8 @@ Este es el **scope más importante**. Si el movimiento no se siente bien, nada i
 - [ ] **Revólver (Sharpshooter):**
   - Primario: disparo penetrante
   - Alt: modo railgun (carga larga, alto daño)
-- [ ] Mejorar coin toss: que rebote entre monedas para combos
 - [ ] Sistema de cambio de arma fluido (sin delay molesto)
-- [ ] Probar: combate con las 3 armas, cambio rápido, coin combos
+- [ ] Probar: combate con las 3 armas, cambio rápido
 
 **Entregable:** Arsenal de 3 armas con 6 variantes total. Cambio fluido entre ellas.
 

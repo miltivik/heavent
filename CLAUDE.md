@@ -104,7 +104,7 @@ godot --headless --path . --quit
 All input actions are defined in `project.godot` under `[input]`. Use action names in code:
 
 - Movement: `move_forward`, `move_back`, `move_left`, `move_right`
-- Actions: `move_jump`, `move_dash`, `move_slide`, `move_slam`, `shoot_primary`, `shoot_secondary`, `coin_toss`
+- Actions: `move_jump`, `move_dash`, `move_slide`, `move_slam`, `shoot_primary`, `shoot_secondary`
 - Weapons: `weapon_next`, `weapon_prev`, `weapon_1`, `weapon_2`, `weapon_3`
 - UI: `ui_cancel`
 

@@ -87,17 +87,10 @@ scripts/player/movement_abilities.gd — Dash, slide, wall jump, slam
 | Escopeta (Pump Charge) | Hitscan/Splash | Spread (disparo múltiple) | Sawblade (sierra proyectil) |
 | Revólver (Sharpshooter) | Hitscan | Piercing (atraviesa enemigos) | Railgun mode |
 
-### Monedas (Coin Toss) — mecánica central
-- Lanzar moneda con tecla dedicada
-- La moneda flota brevemente en el aire
-- Disparar a la moneda redirige el disparo al enemigo más cercano
-- Si hay múltiples monedas, el disparo rebota entre ellas → combos espectaculares
-
 ### Implementación en Godot
 - Sistema de armas con patrón **State Machine** (Idle → Fire → Reload → AltFire)
 - **Proyectiles:** `RigidBody3D` o `CharacterBody3D` dependiendo del tipo
 - **Hitscan:** `RayCast3D` desde la cámara con detección instantánea
-- **Coin:** `RigidBody3D` con gravedad reducida, area3D de detección
 - **Weapon Manager:** script que gestiona el cambio de armas y variantes
 
 ### Archivos
@@ -107,11 +100,9 @@ scenes/weapons/pistol.tscn           — Pistola
 scenes/weapons/shotgun.tscn          — Escopeta
 scenes/weapons/revolver.tscn         — Revólver
 scenes/weapons/projectile_base.tscn  — Proyectil base
-scenes/weapons/coin.tscn             — Moneda
 scripts/weapons/weapon_manager.gd    — Gestor de armas
 scripts/weapons/weapon_base.gd       — Clase base de arma
 scripts/weapons/hitscan.gd           — Utilidad para hitscan
-scripts/weapons/coin.gd              — Lógica de la moneda
 ```
 
 ---
@@ -152,7 +143,6 @@ scripts/pickups/blood_pickup.gd      — Lógica de absorción
   - Matar enemigos
   - Variedad de armas usadas (no spammear la misma)
   - Kills aéreos
-  - Coin shots (disparar monedas)
   - Multi-kills rápidos
   - Kills con proyectiles enemigos (parry)
   - No recibir daño
@@ -161,7 +151,7 @@ scripts/pickups/blood_pickup.gd      — Lógica de absorción
 - Singleton/Autoload `style_manager.gd`
 - Sistema de "combo" con timer de decaimiento (~3-5s sin acción = pierde rango)
 - Cada acción tiene un valor base que se multiplica según el rango actual
-- Mostrar notificaciones flotantes: "AIRSHOT +150", "RICOSHOT +250"
+- Mostrar notificaciones flotantes: "AIRSHOT +150"
 - HUD con indicador de rango animado
 
 ### Archivos
@@ -298,7 +288,7 @@ audio/music/                         — Música (.ogg)
 | Dash | Shift / Q |
 | Slide | Ctrl |
 | Disparo primario | Left Click |
-| Disparo secundario / Coin | E / R |
+| Disparo secundario | E / R |
 | Cambiar arma | 1, 2, 3 / Scroll |
 | Slam | S + Space (en aire) |
 
@@ -335,7 +325,6 @@ Heavent/
 │   │   ├── pistol.tscn
 │   │   ├── shotgun.tscn
 │   │   ├── revolver.tscn
-│   │   └── coin.tscn
 │   ├── enemies/
 │   │   ├── enemy_base.tscn
 │   │   ├── filth.tscn
@@ -361,7 +350,6 @@ Heavent/
 │   │   ├── weapon_manager.gd
 │   │   ├── weapon_base.gd
 │   │   ├── hitscan.gd
-│   │   └── coin.gd
 │   ├── enemies/
 │   │   ├── enemy_base.gd
 │   │   ├── filth.gd
